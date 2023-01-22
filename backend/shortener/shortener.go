@@ -1,4 +1,4 @@
-package main
+package shortener
 
 import (
 	"crypto/md5"
@@ -38,11 +38,11 @@ func (o *LinkShortener) Shorten(link string) (string, error) {
 	var shortUrl string
 	for !foundNonColliding {
 		shortUrl = shortenUrl(link, o.baseUrl)
-		var err error
-		foundNonColliding, err = o.shortLinkExists(shortUrl)
+		exists, err := o.shortLinkExists(shortUrl)
 		if err != nil {
 			panic(err)
 		}
+		foundNonColliding = !exists
 		if !foundNonColliding {
 			link = extendStringWithRandomCharacter(link)
 		}

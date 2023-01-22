@@ -1,4 +1,4 @@
-package main
+package shortener
 
 import (
 	"strings"
@@ -12,7 +12,7 @@ func TestShortenUrl(t *testing.T) {
 	baseUrl := "https://example.com"
 	mockedShortLinkExists := func(string) (bool, error) {
 		invoked = true
-		return true, nil
+		return false, nil
 	}
 	linkShortener := NewLinkShortener(baseUrl, mockedShortLinkExists)
 	shortLink, err := linkShortener.Shorten("https://example.com/full-link/full-link/full-link")
@@ -31,7 +31,7 @@ func TestShortenUrl_WithCollision(t *testing.T) {
 			firstLink = link
 		}
 		invokedTimes += 1
-		return (invokedTimes > 1), nil
+		return (invokedTimes == 1), nil
 	}
 	linkShortener := NewLinkShortener(baseUrl, mockedShortLinkExists)
 	shortLink, err := linkShortener.Shorten("https://example.com/full-link/full-link/full-link")
