@@ -48,7 +48,7 @@ func TestGetShortLink_CreateShortLink(t *testing.T) {
 	req.URL.RawQuery = q.Encode()
 
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(AddShortLink)
+	handler := http.HandlerFunc(VerifyJWT(AddShortLink))
 	handler.ServeHTTP(rr, req)
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v",
@@ -57,6 +57,38 @@ func TestGetShortLink_CreateShortLink(t *testing.T) {
 
 	// Check the response body is what we expect.
 	expected := `{"URL": "https://example.com/bOvh7"}`
+	body := rr.Body.String()
+	if body != expected {
+		t.Errorf("handler returned unexpected body: got %v want %v",
+			rr.Body.String(), expected)
+	}
+}
+
+func TestGetShortLink_CreateShortLink_Unauthorized(t *testing.T) {
+	Init("https://example.com")
+	var jsonData = []byte(`{
+		"URL": "https://example.com/full-url",
+		"Title": "TestUrl"
+	}`)
+
+	req, err := http.NewRequest("POST", "/links", bytes.NewBuffer(jsonData))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	q := req.URL.Query()
+	req.URL.RawQuery = q.Encode()
+
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(VerifyJWT(AddShortLink))
+	handler.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusUnauthorized {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+	// Check the response body is what we expect.
+	expected := `You're Unauthorized due to No token in the header`
 	body := rr.Body.String()
 	if body != expected {
 		t.Errorf("handler returned unexpected body: got %v want %v",

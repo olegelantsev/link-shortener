@@ -24,7 +24,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/x/", api.GetShortLink)
 	mux.HandleFunc("/", api.GetRoot)
-	mux.HandleFunc("/links", api.AddShortLink)
+	mux.HandleFunc("/links", api.VerifyJWT(api.AddShortLink))
 
 	err = http.ListenAndServe(":3333", mux)
 	if errors.Is(err, http.ErrServerClosed) {
